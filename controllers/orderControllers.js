@@ -87,11 +87,19 @@ export const getAllOrders = async (req, res) => {
   try {
     const query = {};
 
+    const { role, _id } = req.user;
+
+    // 🔐 ROLE-BASED VISIBILITY
+    if (role === "sales") {
+      // Sales can see only their own orders
+      query.createdBy = _id;
+    }
+
     if (req.query.status) {
       query.status = req.query.status;
     }
     const orders = await OrderModel.find(query)
-      .populate("customer", "name email")
+      .populate("customer", "name email company phone")
       .populate("createdBy", "name role")
       .sort({ createdAt: -1 });
 

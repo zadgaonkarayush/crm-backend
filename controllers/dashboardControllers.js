@@ -175,7 +175,7 @@ const data = await OrderModel.aggregate([
     },
     {
      $group:{
-      _id:{$dayOfMonth:"createdAt"},
+      _id:{$dayOfMonth:"$createdAt"},
       total:{$sum:"$total"}
      },
     },

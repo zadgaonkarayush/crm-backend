@@ -95,7 +95,11 @@ export const salesProductSales = async (req, res) => {
     const data = await OrderModel.aggregate([
       { $match: { createdBy: req.user._id } },
       { $unwind: "$lines" },
-      {
+
+     {
+         $facet:{
+        products:[
+           {
         $group: {
           _id: "$lines.product",
           quantity: { $sum: "$lines.quantity" },
@@ -104,8 +108,28 @@ export const salesProductSales = async (req, res) => {
           },
         },
       },
+        ],
+
+        total:[
+            {
+                $group:{
+                    _id:null,
+                    totalAmount:{
+                        $sum:{
+                             $multiply: ["$lines.quantity", "$lines.price"],
+                        }
+                    }
+                }
+            },
+            {$project:{_id:0}}
+        ]
+      }
+     }
     ]);
-    res.json(data);
+      res.json({
+      products: data[0].products,
+      totalAmount: data[0].total[0]?.totalAmount || 0,
+    });
   } catch (error) {
     console.error(error.message);
     res

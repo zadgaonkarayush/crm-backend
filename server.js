@@ -8,7 +8,7 @@ import productRoutes from './routes/productRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import userRoutes from './routes/userRoutes.js';
-
+import activityRoutes from './routes/activityRoutes.js';
 dotenv.config();
 
 const app =express();
@@ -29,6 +29,8 @@ app.use('/api/products',productRoutes);
 app.use('/api/orders',orderRoutes);
 app.use('/api/reports',reportRoutes);
 app.use('/api/users',userRoutes);
+app.use('/api/activity',activityRoutes);
+
 
 
 mongoose.connect(process.env.MONGO_URI)

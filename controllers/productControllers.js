@@ -1,5 +1,6 @@
 import CounterModel from "../models/CounterModel.js";
 import ProductModel from "../models/ProductModel.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 export const createProduct = async (req, res) => {
   try {
@@ -13,6 +14,14 @@ export const createProduct = async (req, res) => {
     const product = await ProductModel.create({
       ...req.body,
       sku,
+    });
+
+    await logActivity({
+      action: "PRODUCT_CREATED",
+      entityType: "product",
+      entityId: product._id,
+      message: `Product ${product.name} created`,
+      user: req.user,
     });
     res.status(201).json(product);
   } catch (error) {

@@ -1,18 +1,27 @@
 import CustomerModel from "../models/CustomerModel.js";
 import UserModel from "../models/UserModel.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 export const createCustomer = async (req, res) => {
   try {
     let owner = req.user._id;
-    if(
+    if (
       (req.user.role === "admin" || req.user.role === "manager") &&
       req.body.salesId
-    ){
-      owner = req.body.salesId
+    ) {
+      owner = req.body.salesId;
     }
     const customer = await CustomerModel.create({
       ...req.body,
       createdBy: owner,
+    });
+
+    await logActivity({
+      action: "CUSTOMER_CREATED",
+      entityType: "customer",
+      entityId: customer._id,
+      message: `Customer ${customer.name} created`,
+      user: req.user,
     });
     res.status(201).json(customer);
   } catch (error) {
@@ -22,9 +31,11 @@ export const createCustomer = async (req, res) => {
 export const getCustomerById = async (req, res) => {
   try {
     const { id } = req.params;
-    const customer = await CustomerModel.findById(id)
-      .populate("createdBy", "name email role");
-      
+    const customer = await CustomerModel.findById(id).populate(
+      "createdBy",
+      "name email role",
+    );
+
     if (!customer) {
       return res.status(404).json({ message: "Customer not found" });
     }

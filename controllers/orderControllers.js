@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import OrderModel from "../models/OrdersModel.js";
 import ProductModel from "../models/ProductModel.js";
 import { generateInvoicePDF } from "../utils/invoice.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 export const createOrder = async (req, res) => {
   const session = await mongoose.startSession(); ///for order if 1 success and 2 failed and order reduced from one but not order success(inconsistency)
@@ -43,6 +44,14 @@ export const createOrder = async (req, res) => {
 
     await session.commitTransaction();
     session.endSession();
+
+    await logActivity({
+      action: "ORDER_CREATED",
+      entityType: "order",
+      entityId: order[0]._id,
+      message: `Order created with total ${total}`,
+      user: req.user,
+    });
     res.status(201).json(order[0]);
   } catch (error) {
     await session.abortTransaction();
@@ -77,6 +86,14 @@ export const updateOrderStatus = async (req, res) => {
       { status },
       { new: true },
     );
+
+    await logActivity({
+      action: "ORDER_STATUS_UPDATED",
+      entityType: "order",
+      entityId: order._id,
+      message: `Order status changed to ${status}`,
+      user: req.user,
+    });
     res.json(order);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -108,19 +125,16 @@ export const getAllOrders = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-export const generateInvoice = async(req,res)=>{
-    try{
-        const order = await OrderModel.findById(req.params.id)
-        .populate("customer")
-        .populate("lines.product");
+export const generateInvoice = async (req, res) => {
+  try {
+    const order = await OrderModel.findById(req.params.id)
+      .populate("customer")
+      .populate("lines.product");
 
-        
-    if (!order)
-      return res.status(404).json({ message: "Order not found" });
+    if (!order) return res.status(404).json({ message: "Order not found" });
 
-    generateInvoicePDF(order,res);
-
-    }catch(error){
-        res.status(500).json({error:error.message});
-    }
-}
+    generateInvoicePDF(order, res);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

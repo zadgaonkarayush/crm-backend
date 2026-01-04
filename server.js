@@ -9,6 +9,7 @@ import orderRoutes from './routes/orderRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import activityRoutes from './routes/activityRoutes.js';
+import dashboardRoutes from './routes/dashboardRoutes.js';
 dotenv.config();
 
 const app =express();
@@ -30,7 +31,7 @@ app.use('/api/orders',orderRoutes);
 app.use('/api/reports',reportRoutes);
 app.use('/api/users',userRoutes);
 app.use('/api/activity',activityRoutes);
-
+app.use('/api/dashboard',dashboardRoutes);
 
 
 mongoose.connect(process.env.MONGO_URI)

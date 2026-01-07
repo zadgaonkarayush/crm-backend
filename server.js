@@ -14,10 +14,27 @@ dotenv.config();
 
 const app =express();
 
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://crm-admin-mpcd.vercel.app',
+];
+
+
 app.use(cors({
-     origin: 'http://localhost:5173', // frontend origin
+     origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+
   credentials: true,  
 }));
+
 app.use(express.json());
 
 app.get("/", (req, res) => {

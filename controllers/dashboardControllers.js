@@ -187,3 +187,37 @@ res.json(data)
     res.status(500).json({ message: "Failed to fetch last 7 days sales" });
 }
 }
+
+export const orderStatusCount = async(req,res)=>{
+  try{
+
+    const stats = await OrderModel.aggregate([
+      {
+        $group:{
+          _id:"$status",
+          count:{$sum:1},
+        },
+      },
+    ]);
+
+    const result ={
+      pending:0,
+      completed:0,
+      shipped:0,
+      cancelled:0,
+    };
+
+    stats.forEach((item)=>{
+      result[item._id]=item.count;
+    });
+
+    res.status(200).json({
+      success:true,
+      data:result,
+    })
+
+  }catch(error){
+    console.error(error.message);
+    res.status(500).json({ message: "Failed to fetch order status count" });
+  }
+}

@@ -138,3 +138,23 @@ export const generateInvoice = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const getOrderByCustomerId = async(req,res)=>{
+  try{
+    const {customerId} = req.params;
+
+    const orders = await OrderModel.find({customer:customerId})
+     .select("_id status createdAt total")
+      .sort({ createdAt: -1 });
+    
+      res.status(200).json({
+      success: true,
+      count: orders.length,
+      orders,
+    });
+
+
+  }catch(error){
+    res.status(500).json({ error: error.message });
+  }
+}

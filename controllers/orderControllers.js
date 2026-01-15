@@ -141,10 +141,11 @@ export const generateInvoice = async (req, res) => {
 
 export const getOrderByCustomerId = async(req,res)=>{
   try{
-    const {customerId} = req.params;
-
-    const orders = await OrderModel.find({customer:customerId})
-     .select("_id status createdAt total")
+    const {id:customerId} = req.params;
+   
+    const orders = await OrderModel.find({ customer: new mongoose.Types.ObjectId(customerId)})
+    .populate("customer", "name email company phone")
+    .populate("createdBy", "name role")
       .sort({ createdAt: -1 });
     
       res.status(200).json({
